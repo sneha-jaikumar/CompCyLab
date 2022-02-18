@@ -1,3 +1,5 @@
 # CompCyLab
 
-Challenges: flowkit, numpy (Frameworks vs user)
+Details the work regarding single-cell analysis and processing done through my research at the CompCy Lab
+
+Challenges I ran into: importing flowkit, numpy (navigating Frameworks vs user paths)
