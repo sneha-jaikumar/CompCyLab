@@ -25,7 +25,6 @@ def create_matrix(filePath):
     CNames = CNames[toKeep]
     df_nice = pd.DataFrame(dm_trans,columns=CNames)
     df_nice = df_nice.head(1000)
-    #change to 1000
     df_nice.insert(0,"File Name", [ntpath.basename(filePath) for i in range(1000)], True)
     #df_nice.insert(0, "Index", [i for i in range(10)], True)
     return df_nice
@@ -47,34 +46,33 @@ pca = PCA(n_components=2)
 principalComponents = pca.fit_transform(x)
 principalDf = pd.DataFrame(data = principalComponents
              , columns = ['principal component 1', 'principal component 2'])
-print("Just components?", principalDf)
+#print("Just components?", principalDf)
 #print(end[['File Name']])
 
 fileNameOnly = end[['File Name']].set_index([pd.Index( i for i in range(3000))])
 #print(fileNameOnly)
-
 finalDf = pd.concat([principalDf, fileNameOnly], axis = 1)
 
 #______________________________________________________________________________________________
 
-#Plotting first PCA 
-fig = plt.figure(figsize = (8,8))
-ax = fig.add_subplot(1,1,1) 
-ax.set_xlabel('Principal Component 1', fontsize = 15)
-ax.set_ylabel('Principal Component 2', fontsize = 15)
-ax.set_title('2 component PCA', fontsize = 20)
-targets = ['BC12_all_cells_raw.fcs', 'BC13_all_cells_raw.fcs', 'BC14_all_cells_raw.fcs']
-colors = ['r', 'g', 'b']
+# #Plotting first PCA 
+# fig = plt.figure(figsize = (8,8))
+# ax = fig.add_subplot(1,1,1) 
+# ax.set_xlabel('Principal Component 1', fontsize = 15)
+# ax.set_ylabel('Principal Component 2', fontsize = 15)
+# ax.set_title('2 component PCA', fontsize = 20)
+# targets = ['BC12_all_cells_raw.fcs', 'BC13_all_cells_raw.fcs', 'BC14_all_cells_raw.fcs']
+# colors = ['r', 'g', 'b']
 
-for target, color in zip(targets,colors):
-     indicesToKeep = finalDf['File Name'] == target
-    ax.scatter(finalDf.loc[indicesToKeep, 'principal component 1']
-               , finalDf.loc[indicesToKeep, 'principal component 2']
-               , c = color
-               , s = 50)
-ax.legend(targets)
-ax.grid()
-plt.show()
+# for target, color in zip(targets,colors):
+#      indicesToKeep = finalDf['File Name'] == target
+#     ax.scatter(finalDf.loc[indicesToKeep, 'principal component 1']
+#                , finalDf.loc[indicesToKeep, 'principal component 2']
+#                , c = color
+#                , s = 50)
+# ax.legend(targets)
+# ax.grid()
+# plt.show()
 
 #Plotting second PCA
 
@@ -94,19 +92,15 @@ plt.show()
 
 
 
-#for loop over features(0 to num columns)
-  #continuous color bar for each markers, such as CD45
 #clustering sample (k-means clustering) - partition cells into populations based on the clusters, each cells can only belong to one cluster
 #Cd123 = dendrite 
 #clustering-unsupervised, each cluster has set of similar sets
-#room 305
 
 
 #K Means Clustering
-
-# model = KMeans(n_clusters = 10)
-# label = model.fit_predict(principalDf.iloc[:,:3])
-# u_labels = np.unique(label)
+model = KMeans(n_clusters = 10)
+label = model.fit_predict(finalDf.iloc[:,:2])
+u_labels = np.unique(label)
  
 # for i in u_labels:
 #     plt.scatter(principalDf[label == i]['principal component 1'] , principalDf[label == i]['principal component 2'] , label = i)
@@ -116,7 +110,29 @@ plt.show()
 # plt.title('K Means Clustering with 2 Component PCA')
 # plt.show()
 
-#Spectral Clustering
+print("labels", u_labels)
+temp_vectorBC12 =  [0] * 10
+temp_vectorBC13 =  [0] * 10
+temp_vectorBC14 =  [0] * 10
+for i in u_labels:
+  print(len(finalDf[label == i]))
+  temp_vectorBC12[i] += sum(finalDf[label == i]['File Name'] == 'BC12_all_cells_raw.fcs')
+  temp_vectorBC13[i] += sum(finalDf[label == i]['File Name'] == 'BC13_all_cells_raw.fcs')
+  temp_vectorBC14[i] += sum(finalDf[label == i]['File Name'] == 'BC14_all_cells_raw.fcs')
+
+print("BC12:",temp_vectorBC12)
+print("BC13",temp_vectorBC13)
+print("BC14",temp_vectorBC14)
+
+BC12_vector = np.array(temp_vectorBC12)
+BC13_vector = np.array(temp_vectorBC13)
+BC14_vector = np.array(temp_vectorBC14)
+
+freq_features_matrix = np.array([BC12_vector, BC13_vector, BC14_vector])
+print(freq_features_matrix)
+
+
+# #Spectral Clustering
 # model_2 = SpectralClustering(n_clusters = 10)
 # label = model_2.fit_predict(principalDf.iloc[:,:3])
 # u_labels = np.unique(label)
@@ -129,7 +145,7 @@ plt.show()
 # plt.title('Spectral Clustering with 2 Component PCA')
 # plt.show()
 
-#Agglomerative
+# #Agglomerative Clustering
 # model_3 = AgglomerativeClustering(n_clusters= 10)
 # label = model_3.fit_predict(principalDf.iloc[:,:3])
 # u_labels = np.unique(label)
@@ -144,6 +160,14 @@ plt.show()
 
 
 
+#next steps
+#so for K means clustering, you have 10 clusters
+# for file in filetype: #BC12, BC13, BC14
+#   while file is BC12, 
+
+
+# cluster 1:         cluster 2:          cluster 3:
+#   34 cells from BC12     455 cells from 
 
 
 
